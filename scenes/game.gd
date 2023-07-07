@@ -1,18 +1,19 @@
 extends Node2D
 
-# @onready var noise = FastNoiseLite.new();
-
 const Wall: = preload("res://scenes/Wall.tscn")
 const Edge: = preload("res://scenes/Edge.tscn");
+const Ghost:  = preload("res://scenes/Ghost.tscn");
+const Bullet:  = preload("res://scenes/Bullet.tscn");
 
+# map info
 const map_width: int = 32;
 const map_height: int = 256;
 const tile_size: float = 32;
 
+# camera and player
 @onready var cam = $Camera;
 @onready var player = $Player;
 
-# Called when the node enters the scene tree for the first time.
 func _ready():
 	randomize();
 	generate_map();
@@ -26,18 +27,22 @@ func _ready():
 	right_edge.position.x = map_width*tile_size+width;
 	$Edges.add_child(right_edge);
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	cam.position = player.position;
+	# update ghosts
+	for ghost in $Ghosts.get_children():
+		ghost.target = player.position;
 
 const noise_scale: float = 20;
 
+# creates a tile at (x, y)
 func create_tile(tile, x, y):
 	var t = tile.instantiate();
 	t.position.x = x*tile_size+tile_size/2;
 	t.position.y = y*tile_size+tile_size/2;
 	$Map.add_child(t);
 
+# gap settings
 const min_gap_len = 5;
 const max_gap_len = 10;
 
@@ -62,3 +67,40 @@ func generate_map():
 				1:
 					create_tile(Wall, x, y);
 		spacing = randi()%5+2;
+
+
+# ghost spawning
+func _on_ghost_timer_timeout():
+	var ghost = Ghost.instantiate();
+	ghost.position = Vector2(
+		-tile_size if randi()%2 == 0 else map_width*tile_size+tile_size,
+		player.position.y
+	);
+	ghost.body_entered.connect(func(other: Node2D):
+		if other == player:
+			ghost.repulse(other.position, 1000);
+			if ghost.is_hit:
+				ghost.queue_free();
+	);
+	$Ghosts.add_child(ghost);
+
+func _on_player_shoot():
+	var size = get_viewport_rect().size;
+	var dir = (get_global_mouse_position()-player.position).normalized();
+	var bullet = Bullet.instantiate();
+	bullet.velocity = dir*100;
+	bullet.position = player.position+dir*tile_size*1.5;
+	bullet.hit.connect(_on_bullet_hit);
+	$Bullets.add_child(bullet);
+
+func _on_bullet_hit(bullet, pos: Vector2, other: Node2D):
+	var parent = other.get_parent();
+	if parent == $Ghosts:
+		other.hit(pos);
+		bullet.queue_free();
+	if parent.get_parent() == $Map:
+		bullet.queue_free();
+
+func _on_player_sucking(object):
+	if object.get_parent() == $Ghosts:
+		object.repulse(player.position, -40);

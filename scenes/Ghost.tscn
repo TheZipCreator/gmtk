@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://by3reu2ayxyat"]
+
+[ext_resource type="Texture2D" uid="uid://1s6xb8g3fo7h" path="res://assets/ghost.png" id="1_axt2m"]
+[ext_resource type="Script" path="res://scenes/Ghost.gd" id="1_ded22"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0foyp"]
+size = Vector2(16, 16)
+
+[node name="Ghost" type="Area2D"]
+script = ExtResource("1_ded22")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(2, 2)
+shape = SubResource("RectangleShape2D_0foyp")
+
+[node name="Sprite2D" type="Sprite2D" parent="CollisionShape2D"]
+texture = ExtResource("1_axt2m")
+
+[node name="StunTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+
+[connection signal="timeout" from="StunTimer" to="." method="_on_stun_timer_timeout"]
