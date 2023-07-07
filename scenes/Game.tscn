@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://b0hgt1cptcxrr"]
+
+[ext_resource type="Script" path="res://scenes/game.gd" id="1_vib11"]
+[ext_resource type="PackedScene" uid="uid://dhhoupqgfrqs1" path="res://scenes/Player.tscn" id="2_i8tpj"]
+
+[node name="game" type="Node2D"]
+script = ExtResource("1_vib11")
+
+[node name="Map" type="Node2D" parent="."]
+
+[node name="Player" parent="." instance=ExtResource("2_i8tpj")]
+
+[node name="Camera" type="Camera2D" parent="."]
+
+[node name="Edges" type="Node2D" parent="."]

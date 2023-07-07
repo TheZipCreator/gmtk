@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://cqasx4iqui48m"]
+
+[ext_resource type="Texture2D" uid="uid://dkvo2cy7wqecg" path="res://assets/edge.png" id="1_v4c3g"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8g8ac"]
+size = Vector2(16, 16)
+
+[node name="Edge" type="StaticBody2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(10000, 10000)
+shape = SubResource("RectangleShape2D_8g8ac")
+
+[node name="Sprite2D" type="Sprite2D" parent="CollisionShape2D"]
+texture = ExtResource("1_v4c3g")
