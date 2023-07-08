@@ -1,11 +1,11 @@
 [gd_scene load_steps=5 format=3 uid="uid://dhhoupqgfrqs1"]
 
-[ext_resource type="Texture2D" uid="uid://06b6gp4uuy3e" path="res://assets/player.png" id="1_gwfrm"]
 [ext_resource type="Script" path="res://scenes/player.gd" id="1_ixfgq"]
+[ext_resource type="Texture2D" uid="uid://cb0hxuhgrpdl5" path="res://assets/mc-spritesheet.png" id="2_8hl6c"]
 [ext_resource type="Texture2D" uid="uid://drp5hx455yqc2" path="res://assets/vortex.png" id="3_qko48"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_aehya"]
-size = Vector2(16, 16)
+size = Vector2(14, 20)
 
 [node name="Player" type="CharacterBody2D"]
 script = ExtResource("1_ixfgq")
@@ -15,10 +15,12 @@ scale = Vector2(2, 2)
 shape = SubResource("RectangleShape2D_aehya")
 
 [node name="Sprite2D" type="Sprite2D" parent="CollisionShape2D"]
-texture = ExtResource("1_gwfrm")
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_8hl6c")
+hframes = 21
 
 [node name="BulletTimer" type="Timer" parent="."]
-wait_time = 0.1
+wait_time = 0.2
 one_shot = true
 
 [node name="VortexParent" type="Node2D" parent="."]
@@ -33,8 +35,13 @@ polygon = PackedVector2Array(0, -16, -16, 16, 16, 16)
 [node name="Sprite2D" type="Sprite2D" parent="VortexParent/Vortex/CollisionPolygon2D"]
 texture = ExtResource("3_qko48")
 
+[node name="AnimationTimer" type="Timer" parent="."]
+wait_time = 0.2
+autostart = true
+
 [connection signal="timeout" from="BulletTimer" to="." method="_on_bullet_timer_timeout"]
 [connection signal="area_entered" from="VortexParent/Vortex" to="." method="_on_vortex_area_entered"]
 [connection signal="area_exited" from="VortexParent/Vortex" to="." method="_on_vortex_area_exited"]
 [connection signal="body_entered" from="VortexParent/Vortex" to="." method="_on_vortex_body_entered"]
 [connection signal="body_exited" from="VortexParent/Vortex" to="." method="_on_vortex_body_exited"]
+[connection signal="timeout" from="AnimationTimer" to="." method="_on_animation_timer_timeout"]

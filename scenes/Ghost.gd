@@ -1,5 +1,7 @@
 extends Area2D
 
+const DAMAGE = 40;
+
 const not_hit_img = preload("res://assets/ghost.png");
 const hit_img = preload("res://assets/ghost_hit.png");
 

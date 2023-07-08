@@ -12,17 +12,40 @@ script = ExtResource("1_vib11")
 
 [node name="Camera" type="Camera2D" parent="."]
 
+[node name="CanvasLayer" type="CanvasLayer" parent="Camera"]
+
+[node name="Health" type="Label" parent="Camera/CanvasLayer"]
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Health: 0"
+
+[node name="Died" type="Label" parent="Camera/CanvasLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "You Died. Press space to restart."
+horizontal_alignment = 1
+
 [node name="Edges" type="Node2D" parent="."]
 z_index = 1
 
 [node name="Ghosts" type="Node2D" parent="."]
 
 [node name="GhostTimer" type="Timer" parent="."]
-wait_time = 2.5
+wait_time = 5.0
 autostart = true
 
 [node name="Bullets" type="Node2D" parent="."]
 
+[connection signal="die" from="Player" to="." method="_on_player_die"]
 [connection signal="shoot" from="Player" to="." method="_on_player_shoot"]
 [connection signal="sucking" from="Player" to="." method="_on_player_sucking"]
 [connection signal="timeout" from="GhostTimer" to="." method="_on_ghost_timer_timeout"]
