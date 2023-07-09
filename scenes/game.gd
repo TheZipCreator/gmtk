@@ -19,6 +19,11 @@ const tile_size: float = 32;
 var ending = false;
 var ghost_count = 0;
 var did_boss_fight = false;
+var dialogues = [
+	"WASD/Arrow Keys to move",
+	"LMB to shoot, RMB to suck"
+];
+var dialogue_wait = 0;
 
 # nodes
 @onready var cam = $Camera;
@@ -53,12 +58,25 @@ func _process(delta):
 		var boss = Boss.instantiate();
 		var center = Vector2(tile_size*map_width/2, tile_size*(tower_size+BOSS_ROOM_HEIGHT/2));
 		boss.init(player, center, $Ghosts);
-		boss.state = boss.State.GHOSTS;
 		boss.died.connect(func():
-			start_ending();
-			player.health = 1000;
+			dialogues = [
+				"YE THOUGHT TO HAVE DEFEATED ME, NYE.",
+				"I COMMAND ALL THINE ROLES BE SWAPPED;", 
+				"THY HUNTED TO BECOME THE HUNTERS. NOW PERISH.",
+				func():
+					start_ending();
+					player.health = 1000;
+			]
 		);
 		$Boss.add_child(boss);
+		dialogues = [
+			"AH, SO YE HAVE FOUND ME, HUMAN.",
+			"I HAVE HEARED THAT YE HAVE KILLED ME SUBJECTS.",
+			"I WILL NOT LET THINE TREACHERY STAND.",
+			"LET US DANCE.",
+			func():
+				boss.state = boss.State.GHOSTS;
+		]
 	if did_boss_fight and not ending:
 		if player.position.y < tower_size*tile_size:
 			player.repulse(Vector2(map_width*tile_size/2, 0), 200);
@@ -269,3 +287,23 @@ func _on_player_die():
 func start_ending():
 	ending = true;
 	$GhostTimer.wait_time = 0.2;
+
+
+func _on_dialogue_timer_timeout():
+	if dialogue_wait > 0:
+		dialogue_wait -= 1;
+		if dialogue_wait == 0:
+			hud.get_node("Dialogue").text = "";
+			if dialogues.size() > 0 and dialogues[0] is Callable:
+				dialogues[0].call();
+				dialogues.pop_front();
+		return;
+	if dialogues.size() == 0:
+		return;
+	var d: String = dialogues[0];
+	if d.length() == 0:
+		dialogues.pop_front();
+		dialogue_wait = 20;
+		return;
+	hud.get_node("Dialogue").text += d[0];
+	dialogues[0] = d.substr(1);

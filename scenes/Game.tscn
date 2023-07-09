@@ -36,19 +36,31 @@ grow_vertical = 2
 text = "You Died. Press space to restart."
 horizontal_alignment = 1
 
+[node name="Dialogue" type="Label" parent="Camera/CanvasLayer"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+
 [node name="ParallaxBackground" type="ParallaxBackground" parent="Camera"]
 offset = Vector2(576, 324)
 transform = Transform2D(1, 0, 0, 1, 576, 324)
 
 [node name="ParallaxLayer" type="ParallaxLayer" parent="Camera/ParallaxBackground"]
-motion_scale = Vector2(1.5, 1.5)
+motion_scale = Vector2(1.1, 1.1)
 motion_mirroring = Vector2(1280, 720)
 
 [node name="Sprite2D" type="Sprite2D" parent="Camera/ParallaxBackground/ParallaxLayer"]
 texture = ExtResource("3_q2wcw")
 
 [node name="ParallaxLayer2" type="ParallaxLayer" parent="Camera/ParallaxBackground"]
-motion_scale = Vector2(1.5, 1.5)
+motion_scale = Vector2(1.1, 1.1)
 motion_mirroring = Vector2(1280, 720)
 
 [node name="Sprite2D" type="Sprite2D" parent="Camera/ParallaxBackground/ParallaxLayer2"]
@@ -67,7 +79,12 @@ autostart = true
 
 [node name="Boss" type="Node2D" parent="."]
 
+[node name="DialogueTimer" type="Timer" parent="."]
+wait_time = 0.1
+autostart = true
+
 [connection signal="die" from="Player" to="." method="_on_player_die"]
 [connection signal="shoot" from="Player" to="." method="_on_player_shoot"]
 [connection signal="sucking" from="Player" to="." method="_on_player_sucking"]
 [connection signal="timeout" from="GhostTimer" to="." method="_on_ghost_timer_timeout"]
+[connection signal="timeout" from="DialogueTimer" to="." method="_on_dialogue_timer_timeout"]

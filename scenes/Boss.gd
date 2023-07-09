@@ -64,6 +64,8 @@ var charge_pos;
 
 func _on_timer_timeout():
 	match state:
+		State.INACTIVE:
+			return;
 		State.GHOSTS:
 			if int(times)%10 == 0:
 				play_anim(0);
