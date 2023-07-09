@@ -40,7 +40,7 @@ func init(player, center, ghosts):
 	self.player = player;
 	self.center = center;
 	self.ghosts = ghosts;
-	target = center-Vector2(200, 0);
+	target = center;
 	position = target;
 	body_entered.connect(func(other: Node2D):
 		if other == player and state != State.INACTIVE:

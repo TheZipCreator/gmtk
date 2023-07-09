@@ -16,11 +16,6 @@ script = ExtResource("1_vib11")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="Camera"]
 
-[node name="Health" type="Label" parent="Camera/CanvasLayer"]
-offset_right = 40.0
-offset_bottom = 23.0
-text = "Health: 0"
-
 [node name="Died" type="Label" parent="Camera/CanvasLayer"]
 anchors_preset = 8
 anchor_left = 0.5
@@ -47,6 +42,8 @@ offset_top = -23.0
 offset_right = 20.0
 grow_horizontal = 2
 grow_vertical = 0
+
+[node name="Hearts" type="Node2D" parent="Camera/CanvasLayer"]
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="Camera"]
 offset = Vector2(576, 324)

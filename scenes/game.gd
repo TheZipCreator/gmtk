@@ -8,6 +8,7 @@ const Edge: = preload("res://scenes/Edge.tscn");
 const Ghost:  = preload("res://scenes/Ghost.tscn");
 const Bullet:  = preload("res://scenes/Bullet.tscn");
 const Boss: = preload("res://scenes/Boss.tscn");
+const Heart: = preload("res://scenes/Heart.tscn");
 
 # map info
 const map_width: int = 32;
@@ -34,6 +35,7 @@ func _ready():
 	randomize();
 	generate_map();
 	$Player.position = Vector2((map_width*tile_size)/2, -tile_size*5);
+	# $Player.position = Vector2((map_width*tile_size)/2, tower_size*tile_size);
 	# create edges
 	var left_edge = Edge.instantiate();
 	var width = left_edge.get_node("CollisionShape2D").scale.x*8;
@@ -43,14 +45,18 @@ func _ready():
 	right_edge.position.x = map_width*tile_size+width;
 	$Edges.add_child(right_edge);
 	hud.get_node("Died").hide();
+	for i in range(5):
+		var h = Heart.instantiate()
+		h.init(i);
+		h.position = Vector2(i*30+30, 39);
+		hud.get_node("Hearts").add_child(h);
+		# hud.add_child(h);
 
 func _process(delta):
 	cam.position = player.position;
 	# update ghosts
 	for ghost in $Ghosts.get_children():
 		ghost.target = player.position;
-	# update health
-	hud.get_node("Health").text = "Health: "+str(player.health);
 	if player.died and Input.is_action_pressed("jump"):
 		get_tree().reload_current_scene();
 	if not player.died and not did_boss_fight and player.position.y >= tower_size*tile_size:
@@ -60,9 +66,9 @@ func _process(delta):
 		boss.init(player, center, $Ghosts);
 		boss.died.connect(func():
 			dialogues = [
-				"YE THOUGHT TO HAVE DEFEATED ME, NYE.",
-				"I COMMAND ALL THINE ROLES BE SWAPPED;", 
-				"THY HUNTED TO BECOME THE HUNTERS. NOW PERISH.",
+				"YE THOUGHT TO HAVE DEFEAT'D ME, NYE.",
+				"I COMMAND ALL THINE ROLES BE SWAPP'D;", 
+				"THY HUNT'D TO BECOME THE HUNTERS. NOW PERISH.",
 				func():
 					start_ending();
 					player.health = 1000;
@@ -70,8 +76,8 @@ func _process(delta):
 		);
 		$Boss.add_child(boss);
 		dialogues = [
-			"AH, SO YE HAVE FOUND ME, HUMAN.",
-			"I HAVE HEARED THAT YE HAVE KILLED ME SUBJECTS.",
+			"AH, SO THOU HAST FOUND ME, HUMAN.",
+			"I HAVE HEAR'D THAT THOU HAST KILL'D MINE SUBJECTS.",
 			"I WILL NOT LET THINE TREACHERY STAND.",
 			"LET US DANCE.",
 			func():
@@ -82,6 +88,8 @@ func _process(delta):
 			player.repulse(Vector2(map_width*tile_size/2, 0), 200);
 	if not player.died and ending and player.position.y < 0:
 		get_tree().change_scene_to_packed(preload("res://scenes/Win.tscn"));
+	for h in hud.get_node("Hearts").get_children():
+		h.health = player.health;
 		
 
 const noise_scale: float = 20;
@@ -207,9 +215,11 @@ func generate_map():
 	for y in range(10):
 		set_tile.call(map_width/2, tower_size-y, Tile.AIR);
 		set_tile.call(map_width/2+1, tower_size-y, Tile.AIR);
-	for x in range(BOSS_ROOM_WIDTH*0.5):
-		set_tile.call(x+centerx, tower_size+BOSS_ROOM_HEIGHT/2, Tile.WALL);
-		set_tile.call(centerx+BOSS_ROOM_WIDTH-x-1, tower_size+BOSS_ROOM_HEIGHT*0.75, Tile.WALL);
+	for x in range(BOSS_ROOM_WIDTH*0.25):
+		set_tile.call(x+centerx+BOSS_ROOM_WIDTH*0.1, tower_size+BOSS_ROOM_HEIGHT*0.75, Tile.WALL);
+		set_tile.call(centerx+BOSS_ROOM_WIDTH*0.9-x-1, tower_size+BOSS_ROOM_HEIGHT*0.75, Tile.WALL);
+		set_tile.call(x+centerx+BOSS_ROOM_WIDTH*0.2, tower_size+BOSS_ROOM_HEIGHT*0.5, Tile.WALL);
+		set_tile.call(centerx+BOSS_ROOM_WIDTH*0.8-x-1, tower_size+BOSS_ROOM_HEIGHT*0.5, Tile.WALL);
 	for x in range(map_width):
 		for y in range(map_height):
 			match get_tile.call(x, y):
@@ -282,7 +292,7 @@ func _on_player_sucking(object):
 
 func _on_player_die():
 	hud.get_node("Died").show();
-	hud.get_node("Health").hide();
+	hud.get_node("Hearts").hide();
 
 func start_ending():
 	ending = true;

@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://dvj6l0o41k0nm"]
+
+[ext_resource type="Texture2D" uid="uid://b7xcsn6o2b6p6" path="res://assets/heart.png" id="1_04ip5"]
+[ext_resource type="Script" path="res://scenes/Heart.gd" id="2_bgx7q"]
+
+[node name="Heart" type="Sprite2D"]
+scale = Vector2(2, 2)
+texture = ExtResource("1_04ip5")
+hframes = 7
+vframes = 7
+frame = 27
+script = ExtResource("2_bgx7q")
+
+[node name="AnimationTimer" type="Timer" parent="."]
+wait_time = 0.25
+autostart = true
+
+[connection signal="timeout" from="AnimationTimer" to="." method="_on_animation_timer_timeout"]
