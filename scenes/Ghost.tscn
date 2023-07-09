@@ -20,4 +20,5 @@ texture = ExtResource("1_axt2m")
 wait_time = 2.0
 one_shot = true
 
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]
 [connection signal="timeout" from="StunTimer" to="." method="_on_stun_timer_timeout"]

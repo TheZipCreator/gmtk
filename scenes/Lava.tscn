@@ -1,17 +1,27 @@
-[gd_scene load_steps=3 format=3 uid="uid://dka268dlbu0m"]
+[gd_scene load_steps=4 format=3 uid="uid://dka268dlbu0m"]
 
 [ext_resource type="Texture2D" uid="uid://d3lim5mpvfno5" path="res://assets/lava.png" id="1_rx1yt"]
+[ext_resource type="Script" path="res://scenes/Lava.gd" id="1_y3pty"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_00wji"]
 size = Vector2(16, 16)
 
 [node name="Lava" type="Node2D"]
 scale = Vector2(2, 2)
+script = ExtResource("1_y3pty")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
 texture = ExtResource("1_rx1yt")
+hframes = 8
 
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectangleShape2D_00wji")
+
+[node name="AnimationTimer" type="Timer" parent="."]
+wait_time = 0.2
+autostart = true
+
+[connection signal="timeout" from="AnimationTimer" to="." method="_on_animation_timer_timeout"]

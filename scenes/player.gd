@@ -16,6 +16,7 @@ var sucked_ghosts: Array = []; # ghosts currently being sucked
 var died: = false;
 
 @onready var sprite = $CollisionShape2D/Sprite2D;
+@onready var gun = $CollisionShape2D/Gun;
 
 const anim_frames = [
 	# idle
@@ -75,6 +76,13 @@ func _process(delta):
 			sucking.emit(ghost);
 	sprite.flip_h = get_local_mouse_position().x < 0
 	sprite.frame = anim_frames[anim_state][anim_frame];
+	gun.rotation = Vector2(1, 0).angle_to(get_local_mouse_position());
+	if damage_anim:
+		var amt = 1-$DamageAnimationTimer.time_left;
+		modulate = Color(1, amt, amt, 1);
+		if amt == 0:
+			modulate = Color(1, 255, 255, 255);
+			damage_anim = false;
 
 func _on_bullet_timer_timeout():
 	can_shoot = true;
@@ -94,12 +102,24 @@ func _on_vortex_body_exited(body):
 	if idx != -1:
 		sucked_ghosts.remove_at(idx);
 
+var damage_anim = false;
+
 func damage(amt: int):
 	health -= amt;
-	if health < 0:
-		died = true;
-		die.emit();
+	if amt > 0:
+		$DamageAnimationTimer.start();
+		damage_anim = true;
+		if health < 0:
+			died = true;
+			die.emit();
+	else:
+		if health > MAX_HEALTH:
+			health = MAX_HEALTH;
 
 func _on_animation_timer_timeout():
 	anim_frame += 1;
 	anim_frame %= anim_frames[anim_state].size();
+
+# repulses from the position by a given amount
+func repulse(pos: Vector2, amt: float):
+	velocity += (position-pos).normalized()*amt;

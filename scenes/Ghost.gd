@@ -11,7 +11,7 @@ var target: = Vector2(0, 0);
 var vel: = Vector2(0, 0);
 var is_hit: = false;
 
-const speed: float = 200;
+var speed: float = 200;
 
 func _ready():
 	pass # Replace with function body.
@@ -42,3 +42,6 @@ func hit(pos: Vector2):
 func _on_stun_timer_timeout():
 	sprite.texture = not_hit_img;
 	is_hit = false;
+
+func _on_area_entered(area):
+	body_entered.emit(area);
