@@ -45,3 +45,17 @@ func _on_stun_timer_timeout():
 
 func _on_area_entered(area):
 	body_entered.emit(area);
+
+func init(player, ghosts):
+	body_entered.connect(func(other: Node2D):
+		if other == player:
+			if is_hit:
+				queue_free();
+				player.damage(-20);
+			else:
+				repulse(other.position, 1000);
+				player.repulse(position, 200);
+				player.damage(20);
+		elif other.get_parent() == ghosts:
+			repulse(other.position, 200);
+	);

@@ -65,6 +65,8 @@ autostart = true
 
 [node name="Bullets" type="Node2D" parent="."]
 
+[node name="Boss" type="Node2D" parent="."]
+
 [connection signal="die" from="Player" to="." method="_on_player_die"]
 [connection signal="shoot" from="Player" to="." method="_on_player_shoot"]
 [connection signal="sucking" from="Player" to="." method="_on_player_sucking"]

@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=3 uid="uid://d2bfn27b5oo80"]
+
+[ext_resource type="Script" path="res://scenes/Boss.gd" id="1_hwe8g"]
+[ext_resource type="Texture2D" uid="uid://c8a2jnc1jp770" path="res://assets/boss.png" id="2_nme4c"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_t8w0a"]
+size = Vector2(82, 91)
+
+[node name="Boss" type="Area2D"]
+script = ExtResource("1_hwe8g")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(10, -10)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("2_nme4c")
+hframes = 17
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+z_index = -2
+position = Vector2(-8, -2.5)
+shape = SubResource("RectangleShape2D_t8w0a")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.2
+autostart = true
+
+[node name="DamageTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="AnimTimer" type="Timer" parent="."]
+wait_time = 0.2
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
+[connection signal="timeout" from="AnimTimer" to="." method="_on_anim_timer_timeout"]

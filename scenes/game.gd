@@ -7,6 +7,7 @@ const Spikes: = preload("res://scenes/Spikes.tscn");
 const Edge: = preload("res://scenes/Edge.tscn");
 const Ghost:  = preload("res://scenes/Ghost.tscn");
 const Bullet:  = preload("res://scenes/Bullet.tscn");
+const Boss: = preload("res://scenes/Boss.tscn");
 
 # map info
 const map_width: int = 32;
@@ -17,6 +18,7 @@ const tile_size: float = 32;
 # state
 var ending = false;
 var ghost_count = 0;
+var did_boss_fight = false;
 
 # nodes
 @onready var cam = $Camera;
@@ -27,8 +29,6 @@ func _ready():
 	randomize();
 	generate_map();
 	$Player.position = Vector2((map_width*tile_size)/2, -tile_size*5);
-	# $Player.position = Vector2((map_width*tile_size)/4, tower_size*tile_size);
-	# start_ending();
 	# create edges
 	var left_edge = Edge.instantiate();
 	var width = left_edge.get_node("CollisionShape2D").scale.x*8;
@@ -48,6 +48,23 @@ func _process(delta):
 	hud.get_node("Health").text = "Health: "+str(player.health);
 	if player.died and Input.is_action_pressed("jump"):
 		get_tree().reload_current_scene();
+	if not player.died and not did_boss_fight and player.position.y >= tower_size*tile_size:
+		did_boss_fight = true;
+		var boss = Boss.instantiate();
+		var center = Vector2(tile_size*map_width/2, tile_size*(tower_size+BOSS_ROOM_HEIGHT/2));
+		boss.init(player, center, $Ghosts);
+		boss.state = boss.State.GHOSTS;
+		boss.died.connect(func():
+			start_ending();
+			player.health = 1000;
+		);
+		$Boss.add_child(boss);
+	if did_boss_fight and not ending:
+		if player.position.y < tower_size*tile_size:
+			player.repulse(Vector2(map_width*tile_size/2, 0), 200);
+	if not player.died and ending and player.position.y < 0:
+		get_tree().change_scene_to_packed(preload("res://scenes/Win.tscn"));
+		
 
 const noise_scale: float = 20;
 
@@ -67,6 +84,9 @@ func create_tile(tile, x, y, variant = null):
 	$Map.add_child(t);
 
 enum Tile { AIR, WALL, LAVA, SPIKES };
+
+const BOSS_ROOM_HEIGHT = 15;
+const BOSS_ROOM_WIDTH = 22;
 
 func generate_map():
 	# map array
@@ -158,18 +178,20 @@ func generate_map():
 		if randf() < WALL_CHANGE_CHANCE:
 			wall_right += (randi()%3)-1;
 			wall_right = clamp(wall_right, 0, MAX_WALL_SIZE);
-	const BOSS_ROOM_HEIGHT = 15;
-	const BOSS_ROOM_WIDTH = 22;
 	for x in range(map_width):
 		for y_ in range(map_height-tower_size):
 			var y = y_+tower_size;
 			set_tile.call(x, y, Tile.WALL);
+	var centerx = map_width/2-BOSS_ROOM_WIDTH/2;
 	for x in range(BOSS_ROOM_WIDTH):
 		for y in range(BOSS_ROOM_HEIGHT):
-			set_tile.call(x+map_width/2-BOSS_ROOM_WIDTH/2, y+tower_size+1, Tile.AIR);
+			set_tile.call(x+centerx, y+tower_size+1, Tile.AIR);
 	for y in range(10):
 		set_tile.call(map_width/2, tower_size-y, Tile.AIR);
 		set_tile.call(map_width/2+1, tower_size-y, Tile.AIR);
+	for x in range(BOSS_ROOM_WIDTH*0.5):
+		set_tile.call(x+centerx, tower_size+BOSS_ROOM_HEIGHT/2, Tile.WALL);
+		set_tile.call(centerx+BOSS_ROOM_WIDTH-x-1, tower_size+BOSS_ROOM_HEIGHT*0.75, Tile.WALL);
 	for x in range(map_width):
 		for y in range(map_height):
 			match get_tile.call(x, y):
@@ -199,6 +221,7 @@ func _on_ghost_timer_timeout():
 	if not ending and player.position.y > tower_size*tile_size:
 		return;
 	var ghost = Ghost.instantiate();
+	ghost.init(player, $Ghosts);
 	if not ending:
 		ghost.position = Vector2(
 			-tile_size if randi()%2 == 0 else map_width*tile_size+tile_size,
@@ -209,25 +232,10 @@ func _on_ghost_timer_timeout():
 			sin(ghost_count)*map_width*tile_size,
 			player.position.y+get_viewport_rect().size.y/2
 		);
-		ghost.speed /= 4;
-	
-	ghost.body_entered.connect(func(other: Node2D):
-		if other == player:
-			if ghost.is_hit:
-				ghost.queue_free();
-				player.damage(-20);
-			else:
-				ghost.repulse(other.position, 1000);
-				player.repulse(ghost.position, 200);
-				player.damage(20);
-		elif other.get_parent() == $Ghosts:
-			ghost.repulse(other.position, 200);
-	);
+		ghost.speed *= 1/6.0;
 	$Ghosts.add_child(ghost);
 	ghost_count += 1;
 	# change wait time dependent on player y
-	if not ending:
-		$GhostTimer.wait_time = 5-2*(player.position.y/(map_height*tile_size))
 
 func _on_player_shoot():
 	var size = get_viewport_rect().size;
@@ -243,7 +251,11 @@ func _on_bullet_hit(bullet, pos: Vector2, other: Node2D):
 	if parent == $Ghosts:
 		other.hit(pos);
 		bullet.queue_free();
-	if parent.get_parent() == $Map:
+	elif parent.get_parent() == $Map:
+		bullet.queue_free();
+	elif parent == $Boss:
+		if other.state == other.State.PASSIVE:
+			other.hit();
 		bullet.queue_free();
 
 func _on_player_sucking(object):
